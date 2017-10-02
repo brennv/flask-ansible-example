@@ -1,6 +1,11 @@
-# ansible flask gunicorn nginx ufw systemd example
+# flask-ansible-example
 
-This is an example Flask app, ready to be deployed using Ansible.
+This is an example Flask app, ready to be deployed using ansible. The included playbook:
+
+- installs apt packages and Python utils
+- clones the repo and installs Python requirements in a virtualenv
+- configures gunicorn, nginx, ufw and a systemd service
+- enables and starts services
 
 The `deploy.yml` playbook is modeled after the manual steps discussed in this [digitalocean article](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04) using a Ubuntu [ML (beta)](https://www.digitalocean.com/community/tutorials/how-to-use-the-machine-learning-one-click-install-image-on-digitalocean) instance.
 
