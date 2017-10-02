@@ -103,5 +103,6 @@ ENV/
 # socks
 *.sock
 
-# hosts
+# ansible
 hosts
+*.retry
