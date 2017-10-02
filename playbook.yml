@@ -24,14 +24,26 @@
       requirements: /home/{{ ansible_ssh_user }}/flask-gn/requirements.txt
       virtualenv: /home/{{ ansible_ssh_user }}/flask-gn/env
       virtualenv_python: python3.5
+
+- hosts: webservers
+  become: yes
+  become_method: sudo
+  tasks:
   - copy:
-      src: /home/{{ ansible_ssh_user }}/flask-gn/flask-gn.service
+      src: ./flask-gn.service
       dest: /etc/systemd/system/flask-gn.service
+  - systemd: name=flask-gn.service state=started enabled=yes
   - copy:
-      src: /home/{{ ansible_ssh_user }}/flask-gn/flask-gn.nginx
+      src: ./flask-gn.nginx
       dest: /etc/nginx/sites-available/flask-gn
-
-
-# sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
-# sudo systemctl restart nginx
-# sudo ufw allow 'Nginx Full'
+  - file: path=/etc/nginx/sites-enabled/default state=absent
+  # - command: mv /etc/nginx/sites-enabled/default /tmp/nginx.sites-enabled.default
+  - file:
+      src: /etc/nginx/sites-available/flask-gn
+      dest: /etc/nginx/sites-enabled
+      state: link
+      force: yes
+  - systemd: name=nginx state=restarted enabled=yes
+  - ufw:
+      rule: allow
+      name: Nginx Full
