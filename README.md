@@ -1,3 +1,62 @@
-# flask-gunicorn-nginx example
+# ansible flask gunicorn nginx systemd example
 
-Adapted from this [digitalocean article](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04).
+This is an example Flask app deployed to a Ubuntu host using Ansible. The `playbook.yml` is adapted from this [digitalocean article](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04) using an [ML (beta)](https://www.digitalocean.com/community/tutorials/how-to-use-the-machine-learning-one-click-install-image-on-digitalocean) instance.
+
+## Deploy
+
+If needed, install ansible and configure the ssh agent.
+```
+pip install ansible
+ssh-add ~/.ssh/example_rsa
+```
+
+Create a hosts file, and replace desired hostname and username
+```
+echo '[webservers]' > hosts
+echo 'HOSTNAME ansible_ssh_user=USERNAME'>> hosts
+
+# Test connection with the host
+ansible webservers -m ping
+```
+
+Install and configure: flask, gunicorn, nginx
+```
+ansible-playbook playbook.yml -v
+
+```
+
+## Debugging
+
+Check the logs.
+```
+journalctl -xe
+```
+
+Allow port 5000 and activate the virtualenv.
+```
+sudo ufw allow 5000
+source env/bin/activate
+export FLASK_GN_HOSTNAME=example.com
+```
+
+Test Flask.
+```
+python app.py
+open http://$FLASK_GN_HOSTNAME:5000
+```
+
+Test gunicorn.
+```
+gunicorn --bind 0.0.0.0:5000 wsgi:app
+open http://$FLASK_GN_HOSTNAME:5000
+```
+
+Check for nginx issues.
+```
+sudo nginx -t
+```
+
+Check ports in use.
+```
+netstat -plnt
+```

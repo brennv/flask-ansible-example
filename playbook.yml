@@ -1,0 +1,37 @@
+---
+- hosts: webservers
+  vars:
+    ansible_ssh_user: science
+  # become=yes become_method=sudo
+  # remote_user=root become=yes become_user=science
+  tasks:
+  - shell: echo $USER
+  - apt: name=python-software-properties state=present update_cache=yes cache_valid_time=43200
+  - systemd: name=lighttpd state=stopped enabled=no  # using nginx instead
+  - apt: name={{item}} state=installed
+    with_items:
+      - tree
+      - python-pip
+      - python-dev
+      - python3-pip
+      - python3-dev
+      - nginx
+  - git:
+      repo: 'https://github.com/brennv/flask-gn.git'
+      dest: /home/{{ ansible_ssh_user }}/flask-gn
+      update: yes
+  - pip:
+      requirements: /home/{{ ansible_ssh_user }}/flask-gn/requirements.txt
+      virtualenv: /home/{{ ansible_ssh_user }}/flask-gn/env
+      virtualenv_python: python3.5
+  - copy:
+      src: /home/{{ ansible_ssh_user }}/flask-gn/flask-gn.service
+      dest: /etc/systemd/system/flask-gn.service
+  - copy:
+      src: /home/{{ ansible_ssh_user }}/flask-gn/flask-gn.nginx
+      dest: /etc/nginx/sites-available/flask-gn
+
+
+# sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
+# sudo systemctl restart nginx
+# sudo ufw allow 'Nginx Full'

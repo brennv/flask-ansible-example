@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name default_server;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/science/flask-gn/flask-gn.sock;
+    }
+}
