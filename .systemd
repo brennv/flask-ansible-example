@@ -1,13 +1,13 @@
 [Unit]
-Description=Gunicorn instance to serve flask-gn
+Description=Gunicorn instance to serve flask-ansible-example
 After=network.target
 
 [Service]
 User=science
 Group=www-data
-WorkingDirectory=/home/science/flask-gn
-Environment="PATH=/home/science/flask-gn/env/bin"
-ExecStart=/home/science/flask-gn/env/bin/gunicorn --workers 3 --bind unix:flask-gn.sock -m 007 wsgi:app
+WorkingDirectory=/home/science/flask-ansible-example
+Environment="PATH=/home/science/flask-ansible-example/env/bin"
+ExecStart=/home/science/flask-ansible-example/env/bin/gunicorn --workers 3 --bind unix:flask-ansible-example.sock -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target

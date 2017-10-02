@@ -4,7 +4,7 @@
   vars:
     ansible_ssh_user: science
     github_user: brennv
-    app_name: flask-gn
+    app_name: flask-ansible-example
   tasks:
   - shell: echo $USER
   - apt: name=python-software-properties state=present update_cache=yes cache_valid_time=43200
@@ -30,7 +30,7 @@
   become: yes
   become_method: sudo
   vars:
-    app_name: flask-gn
+    app_name: flask-ansible-example
   tasks:
   - copy:
       src: ./.systemd

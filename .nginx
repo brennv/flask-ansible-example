@@ -3,6 +3,6 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/home/science/flask-gn/flask-gn.sock;
+        proxy_pass http://unix:/home/science/flask-ansible-example/flask-ansible-example.sock;
     }
 }
