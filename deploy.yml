@@ -1,3 +1,5 @@
+# Ansible playbook for deploying a Flask app
+
 ---
 # Install system apt packages
 - hosts: webservers
@@ -7,7 +9,7 @@
   - name: update cache
     apt: name=python-software-properties state=present update_cache=yes cache_valid_time=43200
   - name: disable lighttpd
-    systemd: name=lighttpd state=stopped enabled=no  # using nginx instead
+    systemd: name=lighttpd state=stopped enabled=no  # To avoid conflicts with nginx
   - name: install packages
     apt: name={{item}} state=installed
     with_items:
@@ -25,7 +27,7 @@
     git:
       repo: 'https://github.com/{{ github_user }}/{{ app_name }}.git'
       dest: /home/{{ ansible_ssh_user }}/{{ app_name }}
-      update: yes
+      update: yes  # Does a git pull if the repo already exists
   - name: install modules in a virtualenv
     pip:
       requirements: /home/{{ ansible_ssh_user }}/{{ app_name }}/requirements.txt
@@ -41,7 +43,7 @@
     copy:
       src: .service
       dest: /etc/systemd/system/{{ app_name }}.service
-  - name: start systemd service
+  - name: start systemd app service
     systemd: name={{ app_name }}.service state=restarted enabled=yes
   - name: template nginx site config
     template:
