@@ -5,3 +5,4 @@ app_name=flask-ansible-example  # should match github repo name
 
 [webservers]
 # xxx.xxx.xx.xxx
+165.227.7.71

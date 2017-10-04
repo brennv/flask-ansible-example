@@ -39,13 +39,13 @@
   tasks:
   - name: template systemd service config
     copy:
-      src: .service.j2
+      src: .service
       dest: /etc/systemd/system/{{ app_name }}.service
   - name: start systemd service
     systemd: name={{ app_name }}.service state=restarted enabled=yes
   - name: template nginx site config
     template:
-      src: .nginx.j2
+      src: .nginx
       dest: /etc/nginx/sites-available/{{ app_name }}
   - name: remove default nginx site config
     file: path=/etc/nginx/sites-enabled/default state=absent
