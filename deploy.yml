@@ -1,15 +1,15 @@
 ---
+# Install system apt packages
 - hosts: webservers
   become: yes
-  vars:
-    ansible_ssh_user: science
-    github_user: brennv
-    app_name: flask-ansible-example
+  become_method: sudo
   tasks:
-  - shell: echo $USER
-  - apt: name=python-software-properties state=present update_cache=yes cache_valid_time=43200
-  - systemd: name=lighttpd state=stopped enabled=no  # using nginx instead
-  - apt: name={{ item }} state=installed
+  - name: update cache
+    apt: name=python-software-properties state=present update_cache=yes cache_valid_time=43200
+  - name: disable lighttpd
+    systemd: name=lighttpd state=stopped enabled=no  # using nginx instead
+  - name: install packages
+    apt: name={{item}} state=installed
     with_items:
       - tree
       - python-pip
@@ -17,40 +17,62 @@
       - python3-pip
       - python3-dev
       - nginx
-  - git:
+
+# Install the app, note: don't do these tasks with become sudo
+- hosts: webservers
+  tasks:
+  - name: clone repo
+    git:
       repo: 'https://github.com/{{ github_user }}/{{ app_name }}.git'
       dest: /home/{{ ansible_ssh_user }}/{{ app_name }}
       update: yes
-  - pip:
+  - name: install modules in a virtualenv
+    pip:
       requirements: /home/{{ ansible_ssh_user }}/{{ app_name }}/requirements.txt
       virtualenv: /home/{{ ansible_ssh_user }}/{{ app_name }}/env
       virtualenv_python: python3.5
 
+# Configure app systemd service and nginx
 - hosts: webservers
   become: yes
   become_method: sudo
-  vars:
-    app_name: flask-ansible-example
   tasks:
-  - copy:
+  - name: copy systemd config
+    copy:
       src: ./.systemd
       dest: /etc/systemd/system/{{ app_name }}.service
-  - systemd: name={{ app_name }}.service state=restarted enabled=yes
-  - copy:
+  - name: create systemd service
+    systemd: name={{ app_name }}.service state=restarted enabled=yes
+  - name: copy nginx site config
+    copy:
       src: ./.nginx
       dest: /etc/nginx/sites-available/{{ app_name }}
-  - file: path=/etc/nginx/sites-enabled/default state=absent
+  - name: remove default nginx site config
+    file: path=/etc/nginx/sites-enabled/default state=absent
   # - command: mv /etc/nginx/sites-enabled/default /tmp/nginx.sites-enabled.default
-  - file:
+  - name: enable nginx site
+    file:
       src: /etc/nginx/sites-available/{{ app_name }}
       dest: /etc/nginx/sites-enabled/default
       state: link
       force: yes
-  - systemd: name=nginx state=restarted enabled=yes
-  - ufw:
+  - name: restart nginx
+    systemd: name=nginx state=restarted enabled=yes
+  - name: open firewall for nginx
+    ufw:
       rule: allow
       name: Nginx Full
-  # - get_url:
-  #     url: http://{{ inventory_hostname }}
-  #     dest: /tmp/index.html
-  #     checksum: sha256:b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+
+# Run a quick test to verify the site is working
+- hosts: webservers
+  tasks:
+  - name: get url
+    get_url:
+      url: http://{{inventory_hostname}}
+      dest: /tmp/index.html
+  - name: read html
+    shell: cat /tmp/index.html
+    register: html_contents
+  - name: check for string in html
+    when: html_contents.stdout.find('hello') != -1
+    debug: msg="success!"
