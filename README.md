@@ -1,28 +1,27 @@
 # flask-ansible-example
 
-This is an example Flask app, ready to be deployed with Ansible.
+This is an example Flask app, ready to be deployed with a simplified Ansible playbook.
 
-The included playbook will:
-- install apt packages
-- clone the repo and install Python requirements in a virtualenv
-- configure gunicorn, nginx, ufw and systemd
-- enable and starts services
-- check the url for the expected response
+The included deploy playbook will:
+- Install system apt packages
+- Clone the repo and install Python requirements in a virtualenv
+- Configure gunicorn, nginx, ufw and systemd
+- Enable and start services
+- Check the url for the expected response
 
 The `deploy.yml` playbook is modeled after the manual steps discussed in this [digitalocean article](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04) using a Ubuntu [ML](https://www.digitalocean.com/community/tutorials/how-to-use-the-machine-learning-one-click-install-image-on-digitalocean) instance.
 
 ## Prerequisites
 
-Install Ansible.
+You'll need [Ansible installed](https://docs.ansible.com/ansible/latest/intro_installation.html) and SSH access to any hosts. Customize the local `.hosts` file accordingly. To install Ansible:
 ```
 pip install ansible
 ```
 
 ## Deploying the app
 
-Edit `hosts` and deploy the app.
+Run the deploy playbook.
 ```
-nano hosts
 ansible-playbook deploy.yml
 ```
 
@@ -102,3 +101,7 @@ Check facts.
 ```
 ansible webservers -m setup
 ```
+
+## TODO
+
+Add [CI](https://www.jeffgeerling.com/blog/testing-ansible-roles-travis-ci-github)
