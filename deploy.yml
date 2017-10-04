@@ -13,9 +13,9 @@
   - name: install packages
     apt: name={{item}} state=installed
     with_items:
-      - tree
-      - python-pip
-      - python-dev
+      - tree         # Optional
+      - python-pip   # Optional
+      - python-dev   # Optional
       - python3-pip
       - python3-dev
       - nginx
