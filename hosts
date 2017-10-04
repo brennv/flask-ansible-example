@@ -1,2 +1,7 @@
+[webservers:vars]
+ansible_ssh_user=science
+github_user=brennv
+app_name=flask-ansible-example
+
 [webservers]
-# xxx.xxx.xx.xxx ansible_ssh_user=science
+# xxx.xxx.xx.xxx
