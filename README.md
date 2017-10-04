@@ -28,13 +28,9 @@ ansible-playbook deploy.yml
 
 ## Debugging
 
-Test connection with the host.
+Test connection with the host. If needed, configure the ssh agent.
 ```
 ansible webservers -m ping
-```
-
-If needed, configure the ssh agent.
-```
 ssh-add ~/.ssh/example_rsa
 ```
 
@@ -43,31 +39,46 @@ Rerun the playbook with verbosity.
 ansible-playbook deploy.yml -vvvv
 ```
 
-Check the logs.
+Check the logs on the host.
 ```
 journalctl -xe
+journalctl -u nginx
+journalctl -u flask-ansible-example
 ```
 
-Allow port 5000 and activate the virtualenv.
+Check the systemd status of the services on the host.
 ```
-sudo ufw allow 5000
+sudo systemctl status nginx
+sudo systemctl status flask-ansible-example.service
+```
+
+Test the app.
+```
+sudo ufw allow 5000  # to undo: sudo ufw delete allow 5000
 source env/bin/activate
-export FLASK_GN_HOSTNAME=example.com
-```
-
-Test Flask.
-```
 python app.py
-open http://$FLASK_GN_HOSTNAME:5000
+open http://HOSTNAME:5000
 ```
+If that doesn't work, try running the Flask app with `app.run(debug=True)`
 
 Test gunicorn.
 ```
 gunicorn --bind 0.0.0.0:5000 wsgi:app
-open http://$FLASK_GN_HOSTNAME:5000
 ```
 
-Check for nginx issues.
+Test gunicorn in debug mode.
+```
+gunicorn --log-level debug --error-logfile error.log \
+    --bind 0.0.0.0:5000 wsgi:app
+```
+
+Test gunicorn in debug mode binding to socket.
+```
+gunicorn --workers 3 --log-level deketbug --error-logfile error.log \
+    --bind unix:flask-ansible-example.sock -m 007 wsgi:app
+```
+
+Run nginx tests.
 ```
 sudo nginx -t
 ```
@@ -77,10 +88,14 @@ Check ports in use.
 netstat -plnt
 ```
 
-Run gunicorn in debug mode.
+Check all active connections.
 ```
-gunicorn --workers 3 --log-level debug --error-logfile error.log \
-    --bind unix:flask-ansible-example.sock -m 007 wsgi:app
+netstat -a
+```
+
+If need be, kill any processes using a specific port.
+```
+sudo fuser -k 80/tcp
 ```
 
 Check facts.
