@@ -37,15 +37,15 @@
   become: yes
   become_method: sudo
   tasks:
-  - name: copy systemd config
+  - name: template systemd service config
     copy:
-      src: ./.systemd
+      src: .service.j2
       dest: /etc/systemd/system/{{ app_name }}.service
-  - name: create systemd service
+  - name: start systemd service
     systemd: name={{ app_name }}.service state=restarted enabled=yes
-  - name: copy nginx site config
-    copy:
-      src: ./.nginx
+  - name: template nginx site config
+    template:
+      src: .nginx.j2
       dest: /etc/nginx/sites-available/{{ app_name }}
   - name: remove default nginx site config
     file: path=/etc/nginx/sites-enabled/default state=absent
